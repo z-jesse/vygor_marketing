@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const PROXY = 'https://yawr-marketing.vercel.app';
+const PROXY = 'https://vygor-marketing.vercel.app';
 
 // This is where your static files live (relative to the script or absolute)
 const STATIC_ROOT = '.'; 
