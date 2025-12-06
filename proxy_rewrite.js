@@ -31,16 +31,16 @@ function rewrite(content, currentFilePath) {
 
     // 4. RESTORED: Quoted asset strings (Covers __vite__mapDeps, manifest, etc.)
     // Matches: "assets/...", "chunks/...", "entries/..."
-    .replace(
-      /(["'])(?!https?:\/\/)(?!\/\/)((?:\.{0,2}\/)?(?:assets|chunks|_static|entries)\/[^"']+?\.(?:js|css|json|woff2?|png|jpg|svg|webp))\1/gi,
-      (match, quote, relPath) => {
-        // Resolve path relative to STATIC_ROOT
-        const resolved = path.join(STATIC_ROOT, relPath);
-        const webPath = path.relative(STATIC_ROOT, resolved).split(path.sep).join('/');
+    // .replace(
+    //   /(["'])(?!https?:\/\/)(?!\/\/)((?:\.{0,2}\/)?(?:assets|chunks|_static|entries)\/[^"']+?\.(?:js|css|json|woff2?|png|jpg|svg|webp))\1/gi,
+    //   (match, quote, relPath) => {
+    //     // Resolve path relative to STATIC_ROOT
+    //     const resolved = path.join(STATIC_ROOT, relPath);
+    //     const webPath = path.relative(STATIC_ROOT, resolved).split(path.sep).join('/');
         
-        return `${quote}${PROXY}/${webPath}${quote}`;
-      }
-    )
+    //     return `${quote}${PROXY}/${webPath}${quote}`;
+    //   }
+    // )
 
     // 5. Vite new URL("...", import.meta.url)
     .replace(
