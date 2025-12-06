@@ -22,17 +22,25 @@ function rewrite(content, currentFilePath) {
     .replace(
       /((?:from|import|\(|require\s*\()\s*["'])(?!https?:\/\/)(?!\/\/)((?:\.{1,2}\/)*[^\s"']+\.(?:js|css|json|woff2?|png|jpg|svg|webp))(["'])/gi,
       (match, prefix, relPath, quote) => {
-        // Resolve the relative path against the current file's directory
         const absolutePath = path.resolve(dir, relPath);
-        // Convert to path relative to STATIC_ROOT
         const relativeToRoot = path.relative(STATIC_ROOT, absolutePath);
-        // Normalize to forward slashes for URLs
         const webPath = relativeToRoot.split(path.sep).join('/');
         return `${prefix}${PROXY}/${webPath}${quote}`;
       }
     )
 
-    // 4. (REMOVED) - Quoted asset strings/Vite maps are now ignored.
+    // 4. RESTORED: Quoted asset strings (Covers __vite__mapDeps, manifest, etc.)
+    // Matches: "assets/...", "chunks/...", "entries/..."
+    .replace(
+      /(["'])(?!https?:\/\/)(?!\/\/)((?:\.{0,2}\/)?(?:assets|chunks|_static|entries)\/[^"']+?\.(?:js|css|json|woff2?|png|jpg|svg|webp))\1/gi,
+      (match, quote, relPath) => {
+        // Resolve path relative to STATIC_ROOT
+        const resolved = path.join(STATIC_ROOT, relPath);
+        const webPath = path.relative(STATIC_ROOT, resolved).split(path.sep).join('/');
+        
+        return `${quote}${PROXY}/${webPath}${quote}`;
+      }
+    )
 
     // 5. Vite new URL("...", import.meta.url)
     .replace(
@@ -74,5 +82,4 @@ function walk(dir) {
 
 walk(STATIC_ROOT);
 console.log('PERFECTLY DONE!');
-console.log('HTML, CSS, Imports, and new URL() fixed.');
-console.log('__vite__mapDeps and quoted asset strings were SKIPPED.');
+console.log('__vite__mapDeps arrays AND standard imports are now pointing to PROXY');
