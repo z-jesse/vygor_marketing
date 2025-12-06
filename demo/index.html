@@ -1,0 +1,267 @@
+<!doctype html>
+<html
+  lang="en"
+  data-ws-project="77a6fa2e-6d0e-491b-bd64-869080c4b6b2"
+  data-ws-last-published="2025-12-06T01:58:48.341Z"
+>
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta property="og:url" content="https://url/demo" />
+    <title>Vygor - Book a demo</title>
+    <meta property="og:title" content="Vygor - Book a demo" />
+    <meta property="og:type" content="website" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <link
+      rel="preload"
+      href="/assets/Figtree-VariableFont_wght_4SenVgiUAUYTaxGhVZMd5.ttf"
+      as="font"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="w-element cwu9tw6">
+    <div class="w-element">
+      <div style="display: contents">
+        <div style="display: contents">
+          <div class="w-element cygu30m c8dfwdu cqykkfr">
+            <div class="w-element c3bgmg3 c1qrs49p">
+              <div class="w-element ch289as ceprzsn cq9cy9j">
+                <a
+                  href="/"
+                  class="w-element cdvz54f cb2bonm cc79uqo cc6cbs3 ct4jp1b c13bdzje c1wz92u8 c9ibl5i clwyh1n c1pt4ytt cdf2r2t"
+                  >Vygor</a
+                >
+              </div>
+              <div class="w-element ch289as ci1lsmr c18jfsbn">
+                <a
+                  href="https://www.vygorai.com/login"
+                  class="w-element cdvz54f c1dcwajz cc79uqo cb2bonm c13bdzje clwyh1n c1pt4ytt c1wz92u8 c9ibl5i c1bzdkwm c1vemkct cfchtsu"
+                  >sign in</a
+                ><a
+                  href="/showcase"
+                  class="w-element cdvz54f c1dcwajz cc79uqo cb2bonm c13bdzje clwyh1n c1pt4ytt c1wz92u8 c9ibl5i c1bzdkwm c1vemkct cfchtsu"
+                  >showcase</a
+                ><a
+                  href="/demo"
+                  class="w-element cdvz54f c1dcwajz cc79uqo cb2bonm c13bdzje clwyh1n c1pt4ytt c1wz92u8 c9ibl5i c1bzdkwm c1vemkct cfchtsu"
+                  >book a demo</a
+                ><a
+                  href="/about"
+                  class="w-element cdvz54f c1dcwajz cc79uqo cb2bonm c13bdzje clwyh1n c1pt4ytt c1wz92u8 c9ibl5i c1bzdkwm c1vemkct cfchtsu"
+                  >about</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="w-element">
+        <div class="w-html-embed">
+          <canvas
+            id="dotMatrix"
+            style="
+              width: 100%;
+              height: 100%;
+              display: block;
+              position: absolute;
+              top: 0;
+              left: 0;
+            "
+          ></canvas>
+
+          <script>
+            (function () {
+              const canvas = document.getElementById("dotMatrix");
+              const ctx = canvas.getContext("2d");
+
+              const spacing = 40;
+              const radius = 2;
+              const maxShift = 4;
+              const attractionSpeed = 0.1;
+              const chromaOffset = 2; // offset for chromatic aberration
+              let dots = [];
+              let mouse = { x: -1000, y: -1000 };
+
+              const msToSec = 0.001;
+
+              function createGrid() {
+                dots = [];
+                const rect = canvas.getBoundingClientRect();
+                const width = rect.width;
+                const height = rect.height;
+
+                for (let x = 0; x < width; x += spacing) {
+                  for (let y = 0; y < height; y += spacing) {
+                    dots.push({
+                      x,
+                      y,
+                      period: 2000 + Math.random() * 1000,
+                      offset: Math.random() * Math.PI * 2,
+                      currentX: x,
+                      currentY: y,
+                    });
+                  }
+                }
+              }
+
+              function resize() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                createGrid();
+              }
+
+              new ResizeObserver(resize).observe(canvas);
+
+              window.addEventListener("mousemove", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+              });
+
+              function draw(time) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                dots.forEach((dot) => {
+                  const t = time * msToSec;
+                  // Normal pulsing 0 → 0.4
+                  let alpha =
+                    (Math.sin(
+                      ((2 * Math.PI) / (dot.period * msToSec)) * t + dot.offset,
+                    ) +
+                      1) /
+                    2;
+                  alpha *= 0.4;
+
+                  const dx = dot.x - mouse.x;
+                  const dy = dot.y - mouse.y;
+                  const dist = Math.sqrt(dx * dx + dy * dy);
+                  const radiusEffect = 100;
+
+                  let targetX = dot.x;
+                  let targetY = dot.y;
+
+                  if (dist < radiusEffect) {
+                    // brighten without affecting pulse
+                    alpha += (1 - dist / radiusEffect) * 0.8;
+                    alpha = Math.min(alpha, 1);
+
+                    // attraction toward mouse
+                    const shiftAmount = (1 - dist / radiusEffect) * maxShift;
+                    targetX = dot.x - (dx / dist) * shiftAmount;
+                    targetY = dot.y - (dy / dist) * shiftAmount;
+                  }
+
+                  // smooth easing
+                  dot.currentX += (targetX - dot.currentX) * attractionSpeed;
+                  dot.currentY += (targetY - dot.currentY) * attractionSpeed;
+
+                  // draw normal white dot
+                  ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                  ctx.fillRect(
+                    dot.currentX - radius / 2,
+                    dot.currentY - radius / 2,
+                    radius,
+                    radius,
+                  );
+
+                  // chromatic aberration near mouse using company color + complementary color
+                  if (dist < radiusEffect) {
+                    const splitX = (dx / dist) * chromaOffset;
+                    const splitY = (dy / dist) * chromaOffset;
+
+                    // company color (#CCC395)
+                    ctx.fillStyle = `rgba(204,195,149,${alpha})`;
+                    ctx.fillRect(
+                      dot.currentX - radius / 2 - splitX,
+                      dot.currentY - radius / 2 - splitY,
+                      radius,
+                      radius,
+                    );
+
+                    // complementary color (rgb(51,60,106))
+                    ctx.fillStyle = `rgba(51,60,106,${alpha})`;
+                    ctx.fillRect(
+                      dot.currentX - radius / 2 + splitX,
+                      dot.currentY - radius / 2 + splitY,
+                      radius,
+                      radius,
+                    );
+                  }
+                });
+
+                requestAnimationFrame(draw);
+              }
+
+              resize();
+              requestAnimationFrame(draw);
+            })();
+          </script>
+        </div>
+        <div
+          class="w-element c8xclay ch289as c18jfsbn c1y95tlr c1046myg c98ragj c1kccy3i c17hziw0 c86ha57"
+        >
+          <div class="w-element c1dzbp3y c1b60n1g c1vl6gom c17ilj6p cezp27y">
+            <div class="w-html-embed">
+              <div data-tf-live="01JVWPFJ9SZ7BVAHZQC8E4A9QM"></div>
+              <script src="//embed.typeform.com/next/embed.js"></script>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script id="vike_pageContext" type="application/json">
+      {
+        "_urlRewrite": null,
+        "pageId": "/pages/demo",
+        "routeParams": {},
+        "data": {
+          "url": "https://url/demo",
+          "system": {
+            "params": {},
+            "search": {},
+            "origin": "https://url",
+            "pathname": "/demo"
+          },
+          "resources": {},
+          "pageMeta": {
+            "title": "Vygor - Book a demo",
+            "description": "",
+            "excludePageFromSearch": true,
+            "language": "",
+            "socialImageAssetName": "!undefined",
+            "socialImageUrl": "",
+            "status": "!undefined",
+            "redirect": "",
+            "custom": []
+          }
+        }
+      }
+    </script>
+    <script id="vike_globalContext" type="application/json">
+      {}
+    </script>
+    <script
+      src="/assets/entries/entry-server-routing.n8vx04Vi.js"
+      type="module"
+      async
+    ></script>
+    <link
+      rel="modulepreload"
+      href="/assets/entries/pages_demo.BkPJ6svI.js"
+      as="script"
+      type="text/javascript"
+    /><link
+      rel="modulepreload"
+      href="/assets/chunks/chunk-BnkZGbG_.js"
+      as="script"
+      type="text/javascript"
+    />
+  </body>
+</html>
