@@ -1,4 +1,4 @@
-import{j as e,P as a,l as p,m as g,R as u,a as l,i as r,b as h}from"../chunks/chunk-BnkZGbG_.js";/* empty css                      */const i=void 0,w=[{id:"7tDmfXk1yZYfU7vRcPD9L"},{id:"2VUsvnrsc6vlIyswml8aQ",maxWidth:991},{id:"i0AQFBAi8MCTPNt6MoVec",maxWidth:767},{id:"-gexacQEc0uNdIPWSZX_F",maxWidth:479}],y=void 0,b=["Figtree-VariableFont_wght_4SenVgiUAUYTaxGhVZMd5.ttf"],f=[],x=c=>e.jsxs("body",{className:"w-element cwu9tw6",children:[e.jsx(a,{code:`<style>
+import{j as e,P as a,l as p,m as g,R as u,a as l,i as r,b as h}from"https://yawr-marketing.vercel.app/assets/chunks/chunk-BnkZGbG_.js";/* empty css                      */const i=void 0,w=[{id:"7tDmfXk1yZYfU7vRcPD9L"},{id:"2VUsvnrsc6vlIyswml8aQ",maxWidth:991},{id:"i0AQFBAi8MCTPNt6MoVec",maxWidth:767},{id:"-gexacQEc0uNdIPWSZX_F",maxWidth:479}],y=void 0,b=["Figtree-VariableFont_wght_4SenVgiUAUYTaxGhVZMd5.ttf"],f=[],x=c=>e.jsxs("body",{className:"w-element cwu9tw6",children:[e.jsx(a,{code:`<style>
   body::-webkit-scrollbar {
     display: none;
   }
