@@ -1,17 +1,18 @@
-// 1. Fix Vike's kn() so it doesn't break absolute URLs
-globalThis.kn = function (e) {
-  const path = String(e);
-  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("//")) {
-    return path;                    // already has domain → don't touch it
-  }
-  return path.startsWith("/") ? path : "/" + path;
-};
+// Patch kn() to skip absolute URLs (critical for client-side)
+(function() {
+  if (typeof kn !== 'undefined') return; // Avoid re-patching
+  const originalKn = e => '/' + e;
+  globalThis.kn = function(e) {
+    const path = String(e);
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
+      return path;  // Already absolute: return as-is
+    }
+    return originalKn(path);  // Fallback to Vike's behavior
+  };
+})();
 
-// 2. Make all assets load with full absolute URL (this replaces the old __vite__mapDeps)
-const ABSOLUTE_ORIGIN = typeof location !== "undefined" 
-  ? location.origin 
-  : "https://vygor-marketing.vercel.app";
-
+// Patched __vite__mapDeps for absolute URLs
+const ABSOLUTE_ORIGIN = typeof location !== 'undefined' ? location.origin : 'https://vygor-marketing.vercel.app';
 const __vite__mapDeps = (
   i,
   m = __vite__mapDeps,
@@ -24,6 +25,11 @@ const __vite__mapDeps = (
     `${ABSOLUTE_ORIGIN}/assets/entries/pages_showcase.BkWOdTaK.js`,
   ])
 ) => i.map(idx => d[idx]);
+
+// Override any existing one
+if (typeof window !== 'undefined') {
+  window.__vite__mapDeps = __vite__mapDeps;
+}
 
 function ge(e) {
   return Array.from(new Set(e));
