@@ -2,13 +2,13 @@
 <html
   lang="en"
   data-ws-project="77a6fa2e-6d0e-491b-bd64-869080c4b6b2"
-  data-ws-last-published="2025-12-06T01:58:48.341Z"
+  data-ws-last-published="2025-12-08T21:48:48.617Z"
 >
   <head>
     <link
       rel="stylesheet"
       type="text/css"
-      href="/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css"
+      href="/assets/static/app_generated_index-6937cd5a.BCNJx_Wa.css"
     />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -33,7 +33,7 @@
       crossorigin="anonymous"
     />
   </head>
-  <body class="w-element cwu9tw6">
+  <body class="w-element c1y22hzg">
     <div class="w-element">
       <div style="display: contents">
         <div style="display: contents">
@@ -240,41 +240,6 @@
             >
               your studio’s control center, re-imagined
             </p>
-            <div class="w-html-embed">
-              <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                  function updateClock() {
-                    const now = new Date();
-
-                    // compute GMT offset dynamically
-                    const offsetMinutes = -now.getTimezoneOffset();
-                    const sign = offsetMinutes >= 0 ? "+" : "-";
-                    const absMinutes = Math.abs(offsetMinutes);
-                    const hoursOffset = String(
-                      Math.floor(absMinutes / 60),
-                    ).padStart(2, "0");
-                    const minutesOffset = String(absMinutes % 60).padStart(
-                      2,
-                      "0",
-                    );
-
-                    // update both elements
-                    document.getElementById("gmt").textContent =
-                      `GMT${sign}${hoursOffset}:${minutesOffset}`;
-                    document.getElementById("time").textContent =
-                      now.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        hour12: true,
-                      });
-                  }
-
-                  updateClock();
-                  setInterval(updateClock, 1000);
-                });
-              </script>
-            </div>
             <p
               id="gmt"
               class="w-element cnk4v2h cnh40e7 c1v12ybg cb2bonm cc79uqo"
@@ -290,6 +255,56 @@
               >
                 [time]
               </p>
+            </div>
+            <div class="w-html-embed">
+              <script>
+                // Global clock controller – survives body replacement
+                let __clockInterval = null;
+
+                function startGlobalClock() {
+                  if (__clockInterval) clearInterval(__clockInterval);
+
+                  const update = () => {
+                    const gmt = document.getElementById("gmt");
+                    const time = document.getElementById("time");
+                    if (!gmt || !time) {
+                      clearInterval(__clockInterval);
+                      __clockInterval = null;
+                      return;
+                    }
+
+                    const now = new Date();
+                    const offset = -now.getTimezoneOffset();
+                    const sign = offset >= 0 ? "+" : "-";
+                    const abs = Math.abs(offset);
+                    gmt.textContent = `GMT${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
+                    time.textContent = now.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      hour12: true,
+                    });
+                  };
+
+                  update();
+                  __clockInterval = setInterval(update, 1000);
+                }
+
+                // Run on classic full load
+                document.addEventListener("DOMContentLoaded", startGlobalClock);
+
+                // Run after Turbo / Turbolinks
+                document.addEventListener("turbo:load", startGlobalClock);
+
+                // Run after htmx swaps
+                document.body.addEventListener(
+                  "htmx:afterSwap",
+                  startGlobalClock,
+                );
+
+                // Run after Alpine/x-mini, Morphdom, etc.
+                document.addEventListener("livewire:load", startGlobalClock);
+              </script>
             </div>
           </div>
         </div>
@@ -327,18 +342,18 @@
       {}
     </script>
     <script
-      src="/assets/entries/entry-server-routing.n8vx04Vi.js"
+      src="/assets/entries/entry-server-routing.CQjEESUE.js"
       type="module"
       async
     ></script>
     <link
       rel="modulepreload"
-      href="/assets/entries/pages_index.CQhzUGTn.js"
+      href="/assets/entries/pages_index.iwjJlAJ5.js"
       as="script"
       type="text/javascript"
     /><link
       rel="modulepreload"
-      href="/assets/chunks/chunk-BnkZGbG_.js"
+      href="/assets/chunks/chunk-Bx7KECRG.js"
       as="script"
       type="text/javascript"
     />
