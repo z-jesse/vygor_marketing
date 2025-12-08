@@ -1,35 +1,48 @@
-// Patch kn() to skip absolute URLs (critical for client-side)
-(function() {
-  if (typeof kn !== 'undefined') return; // Avoid re-patching
-  const originalKn = e => '/' + e;
-  globalThis.kn = function(e) {
+// 1. Patch kn() safely – works even if original kn is declared later
+(function () {
+  const safeKn = function (e) {
     const path = String(e);
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
-      return path;  // Already absolute: return as-is
+    // If it's already an absolute URL (has http:// or https:// or //), return it unchanged
+    if (/^https?:\/\//i.test(path) || path.startsWith("//")) {
+      return path;
     }
-    return originalKn(path);  // Fallback to Vike's behavior
+    // Otherwise behave like the original Vike kn(): add leading slash
+    return path.startsWith("/") ? path : "/" + path;
   };
+
+  // Define it on globalThis so it's available everywhere
+  Object.defineProperty(globalThis, "kn", {
+    value: safeKn,
+    writable: true,
+    configurable: true,
+  });
 })();
 
-// Patched __vite__mapDeps for absolute URLs
-const ABSOLUTE_ORIGIN = typeof location !== 'undefined' ? location.origin : 'https://vygor-marketing.vercel.app';
-const __vite__mapDeps = (
-  i,
-  m = __vite__mapDeps,
-  d = m.f || (m.f = [
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_about.BCLmBN-i.js`,
-    `${ABSOLUTE_ORIGIN}/assets/chunks/chunk-BnkZGbG_.js`,
-    `${ABSOLUTE_ORIGIN}/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css`,
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_demo.BkPJ6svI.js`,
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_index.CQhzUGTn.js`,
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_showcase.BkWOdTaK.js`,
-  ])
-) => i.map(idx => d[idx]);
+// 2. Make __vite__mapDeps return absolute URLs
+(function () {
+  const origin = typeof location !== "undefined" ? location.origin : "https://vygor-marketing.vercel.app";
 
-// Override any existing one
-if (typeof window !== 'undefined') {
-  window.__vite__mapDeps = __vite__mapDeps;
-}
+  const absoluteAssets = [
+    `${origin}/assets/entries/pages_about.BCLmBN-i.js`,
+    `${origin}/assets/chunks/chunk-BnkZGbG_.js`,
+    `${origin}/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css`,
+    `${origin}/assets/entries/pages_demo.BkPJ6svI.js`,
+    `${origin}/assets/entries/pages_index.CQhzUGTn.js`,
+    `${origin}/assets/entries/pages_showcase.BkWOdTaK.js`,
+  ];
+
+  const fixedMapDeps = (i) => i.map((idx) => absoluteAssets[idx]);
+
+  // Replace the function (even if it doesn't exist yet)
+  Object.defineProperty(globalThis, "__vite__mapDeps", {
+    value: fixedMapDeps,
+    writable: true,
+    configurable: true,
+  });
+
+  // Also set .f in case anything reads it directly
+  fixedMapDeps.f = absoluteAssets;
+})();
 
 function ge(e) {
   return Array.from(new Set(e));
