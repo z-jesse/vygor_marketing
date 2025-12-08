@@ -1,29 +1,50 @@
-// 1. Fix Vike's kn() so it doesn't break absolute URLs
-globalThis.kn = function (e) {
-  const path = String(e);
-  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("//")) {
-    return path;                    // already has domain → don't touch it
-  }
-  return path.startsWith("/") ? path : "/" + path;
-};
+// 1. Safely override kn() without causing Temporal Dead Zone error
+(() => {
+  const smartKn = (e) => {
+    const path = String(e);
+    // If it's already an absolute URL → return unchanged
+    if (/^https?:\/\//i.test(path) || path.startsWith("//")) {
+      return path;
+    }
+    // Otherwise behave exactly like Vike expects
+    return path.startsWith("/") ? path : "/" + path;
+  };
 
-// 2. Make all assets load with full absolute URL (this replaces the old __vite__mapDeps)
-const ABSOLUTE_ORIGIN = typeof location !== "undefined" 
-  ? location.origin 
-  : "https://vygor-marketing.vercel.app";
+  // Force-define it on globalThis – this works even if a `const kn` exists later
+  Object.defineProperty(globalThis, "kn", {
+    value: smartKn,
+    writable: true,
+    configurable: true,
+  });
+})();
 
-const __vite__mapDeps = (
-  i,
-  m = __vite__mapDeps,
-  d = m.f || (m.f = [
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_about.BCLmBN-i.js`,
-    `${ABSOLUTE_ORIGIN}/assets/chunks/chunk-BnkZGbG_.js`,
-    `${ABSOLUTE_ORIGIN}/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css`,
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_demo.BkPJ6svI.js`,
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_index.CQhzUGTn.js`,
-    `${ABSOLUTE_ORIGIN}/assets/entries/pages_showcase.BkWOdTaK.js`,
-  ])
-) => i.map(idx => d[idx]);
+// 2. Absolute URLs for all assets – works in SSR and browser
+(() => {
+  const origin = typeof location !== "undefined" 
+    ? location.origin 
+    : "https://vygor-marketing.vercel.app";
+
+  const assets = [
+    `${origin}/assets/entries/pages_about.BCLmBN-i.js`,
+    `${origin}/assets/chunks/chunk-BnkZGbG_.js`,
+    `${origin}/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css`,
+    `${origin}/assets/entries/pages_demo.BkPJ6svI.js`,
+    `${origin}/assets/entries/pages_index.CQhzUGTn.js`,
+    `${origin}/assets/entries/pages_showcase.BkWOdTaK.js`,
+  ];
+
+  const fixedMapDeps = (i) => i.map(idx => assets[idx]);
+
+  // Override the function globally
+  Object.defineProperty(globalThis, "__vite__mapDeps", {
+    value: fixedMapDeps,
+    writable: true,
+    configurable: true,
+  });
+
+  // Keep the .f array in case anything reads it directly
+  fixedMapDeps.f = assets;
+})();
 
 function ge(e) {
   return Array.from(new Set(e));
