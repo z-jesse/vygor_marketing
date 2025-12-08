@@ -1,46 +1,50 @@
-// 1. Patch kn() safely – works even if original kn is declared later
+// Detect SSR (Node.js) vs Browser
+const isSSR = typeof window === 'undefined';
+const ABSOLUTE_ORIGIN = isSSR 
+  ? 'https://vygor-marketing.vercel.app'  // Clean hardcoded for SSR – no mangling
+  : location.origin;  // Dynamic in browser
+
+// 1. Safe kn() patch – overrides Vike's blindly without TDZ errors
 (function () {
   const safeKn = function (e) {
-    const path = String(e);
-    // If it's already an absolute URL (has http:// or https:// or //), return it unchanged
-    if (/^https?:\/\//i.test(path) || path.startsWith("//")) {
-      return path;
+    let path = String(e).trim();  // Trim any whitespace
+    // Fix common mangles: if it's like "https:/domain" → "https://domain"
+    if (path.startsWith('https:/') && !path.startsWith('https://')) {
+      path = path.replace('https:/', 'https://');
     }
-    // Otherwise behave like the original Vike kn(): add leading slash
-    return path.startsWith("/") ? path : "/" + path;
+    if (/^https?:\/\//i.test(path) || path.startsWith('//')) {
+      return path;  // Already absolute: return as-is
+    }
+    return path.startsWith('/') ? path : '/' + path;
   };
 
-  // Define it on globalThis so it's available everywhere
-  Object.defineProperty(globalThis, "kn", {
+  // Force override on globalThis (works in SSR + browser)
+  Object.defineProperty(globalThis, 'kn', {
     value: safeKn,
     writable: true,
     configurable: true,
   });
 })();
 
-// 2. Make __vite__mapDeps return absolute URLs
+// 2. Absolute __vite__mapDeps – with slash normalization
 (function () {
-  const origin = typeof location !== "undefined" ? location.origin : "https://vygor-marketing.vercel.app";
-
   const absoluteAssets = [
-    `${origin}/assets/entries/pages_about.BCLmBN-i.js`,
-    `${origin}/assets/chunks/chunk-BnkZGbG_.js`,
-    `${origin}/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css`,
-    `${origin}/assets/entries/pages_demo.BkPJ6svI.js`,
-    `${origin}/assets/entries/pages_index.CQhzUGTn.js`,
-    `${origin}/assets/entries/pages_showcase.BkWOdTaK.js`,
-  ];
+    `${ABSOLUTE_ORIGIN}/assets/entries/pages_about.BCLmBN-i.js`,
+    `${ABSOLUTE_ORIGIN}/assets/chunks/chunk-BnkZGbG_.js`,
+    `${ABSOLUTE_ORIGIN}/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css`,
+    `${ABSOLUTE_ORIGIN}/assets/entries/pages_demo.BkPJ6svI.js`,
+    `${ABSOLUTE_ORIGIN}/assets/entries/pages_index.CQhzUGTn.js`,
+    `${ABSOLUTE_ORIGIN}/assets/entries/pages_showcase.BkWOdTaK.js`,
+  ].map(asset => asset.replace(/([^:])\/\/+/g, '$1/'));  // Normalize any "//" to "/"
 
-  const fixedMapDeps = (i) => i.map((idx) => absoluteAssets[idx]);
+  const fixedMapDeps = (i) => i.map((idx) => absoluteAssets[idx] || '');
 
-  // Replace the function (even if it doesn't exist yet)
-  Object.defineProperty(globalThis, "__vite__mapDeps", {
+  // Override globally
+  Object.defineProperty(globalThis, '__vite__mapDeps', {
     value: fixedMapDeps,
     writable: true,
     configurable: true,
   });
-
-  // Also set .f in case anything reads it directly
   fixedMapDeps.f = absoluteAssets;
 })();
 
