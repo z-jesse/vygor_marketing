@@ -1,52 +1,35 @@
-// Detect SSR (Node.js) vs Browser
-const isSSR = typeof window === 'undefined';
-const ABSOLUTE_ORIGIN = isSSR 
-  ? 'https://vygor-marketing.vercel.app'  // Clean hardcoded for SSR – no mangling
-  : location.origin;  // Dynamic in browser
-
-// 1. Safe kn() patch – overrides Vike's blindly without TDZ errors
-(function () {
-  const safeKn = function (e) {
-    let path = String(e).trim();  // Trim any whitespace
-    // Fix common mangles: if it's like "https:/domain" → "https://domain"
-    if (path.startsWith('https:/') && !path.startsWith('https://')) {
-      path = path.replace('https:/', 'https://');
-    }
-    if (/^https?:\/\//i.test(path) || path.startsWith('//')) {
+// Patch kn() to skip absolute URLs (critical for client-side)
+(function() {
+  if (typeof kn !== 'undefined') return; // Avoid re-patching
+  const originalKn = e => '/' + e;
+  globalThis.kn = function(e) {
+    const path = String(e);
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
       return path;  // Already absolute: return as-is
     }
-    return path.startsWith('/') ? path : '/' + path;
+    return originalKn(path);  // Fallback to Vike's behavior
   };
-
-  // Force override on globalThis (works in SSR + browser)
-  Object.defineProperty(globalThis, 'kn', {
-    value: safeKn,
-    writable: true,
-    configurable: true,
-  });
 })();
 
-// 2. Absolute __vite__mapDeps – with slash normalization
-(function () {
-  const absoluteAssets = [
+// Patched __vite__mapDeps for absolute URLs
+const ABSOLUTE_ORIGIN = typeof location !== 'undefined' ? location.origin : 'https://vygor-marketing.vercel.app';
+const __vite__mapDeps = (
+  i,
+  m = __vite__mapDeps,
+  d = m.f || (m.f = [
     `${ABSOLUTE_ORIGIN}/assets/entries/pages_about.BCLmBN-i.js`,
     `${ABSOLUTE_ORIGIN}/assets/chunks/chunk-BnkZGbG_.js`,
     `${ABSOLUTE_ORIGIN}/assets/static/app_generated_index-6937cd5a.CwuFXsfN.css`,
     `${ABSOLUTE_ORIGIN}/assets/entries/pages_demo.BkPJ6svI.js`,
     `${ABSOLUTE_ORIGIN}/assets/entries/pages_index.CQhzUGTn.js`,
     `${ABSOLUTE_ORIGIN}/assets/entries/pages_showcase.BkWOdTaK.js`,
-  ].map(asset => asset.replace(/([^:])\/\/+/g, '$1/'));  // Normalize any "//" to "/"
+  ])
+) => i.map(idx => d[idx]);
 
-  const fixedMapDeps = (i) => i.map((idx) => absoluteAssets[idx] || '');
-
-  // Override globally
-  Object.defineProperty(globalThis, '__vite__mapDeps', {
-    value: fixedMapDeps,
-    writable: true,
-    configurable: true,
-  });
-  fixedMapDeps.f = absoluteAssets;
-})();
+// Override any existing one
+if (typeof window !== 'undefined') {
+  window.__vite__mapDeps = __vite__mapDeps;
+}
 
 function ge(e) {
   return Array.from(new Set(e));
