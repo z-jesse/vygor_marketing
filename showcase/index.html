@@ -2,7 +2,7 @@
 <html
   lang="en"
   data-ws-project="77a6fa2e-6d0e-491b-bd64-869080c4b6b2"
-  data-ws-last-published="2025-12-09T01:57:08.595Z"
+  data-ws-last-published="2025-12-09T02:05:26.216Z"
 >
   <head>
     <link
@@ -151,7 +151,6 @@
                       "https://res.cloudinary.com/drihq534t/image/upload/v1764744897/jbrpmzngd1rvjkasjybp_40_zknb6o.webp",
                   },
                 ];
-
                 /* ---------- DOM references ---------- */
                 const bg = document.getElementById("bg-scroll");
                 const spacer = document.getElementById("spacer");
@@ -161,7 +160,6 @@
                 const coordsEl = document.getElementById("coordinates");
                 const websiteEl = document.getElementById("website");
                 const linkEl = document.getElementById("link");
-
                 /* ---------- State ---------- */
                 let vh = window.innerHeight;
                 const total = sections.length;
@@ -171,17 +169,14 @@
                 let layers = [];
                 let ticking = false;
                 let lastSectionIndex = -1;
-
                 /* ---------- Build layers ---------- */
                 function buildLayers() {
                   bg.innerHTML = "";
                   layers = [];
-
                   for (let cycle = 0; cycle < cycleCount; cycle++) {
                     for (let i = 0; i < total; i++) {
                       const s = sections[i];
                       const layer = document.createElement("div");
-
                       layer.style.position = "absolute";
                       layer.style.top = "0";
                       layer.style.left = "0";
@@ -193,15 +188,12 @@
                       layer.style.backgroundRepeat = "no-repeat";
                       layer.style.willChange = "transform";
                       layer.style.pointerEvents = "none";
-
                       bg.appendChild(layer);
                       layers.push(layer);
                     }
                   }
-
                   spacer.style.height = `${logicalHeight * spacerMultiplier}px`;
                 }
-
                 /* ---------- Helpers ---------- */
                 function getLogicalScroll(realScroll) {
                   return (
@@ -209,7 +201,6 @@
                     logicalHeight
                   );
                 }
-
                 function setCenterContent(idx) {
                   const i = ((idx % total) + total) % total;
                   const s = sections[i];
@@ -218,9 +209,14 @@
                   cityEl.innerHTML = s.city;
                   coordsEl.innerHTML = s.coordinates;
                   websiteEl.innerHTML = s.website;
-                  link.href = "https://" + s.website;
+                  if (s.website === "-------------") {
+                    linkEl.removeAttribute("href");
+                    linkEl.style.pointerEvents = "none";
+                  } else {
+                    linkEl.href = "https://" + s.website;
+                    linkEl.style.pointerEvents = "auto";
+                  }
                 }
-
                 /* ---------- Render loop ---------- */
                 function render(logicalScroll) {
                   // center of viewport
@@ -242,13 +238,11 @@
                     layers[idx].style.transform = `translateY(${translateY}px)`;
                   }
                 }
-
                 function onScrollRaf() {
                   const logical = getLogicalScroll(window.scrollY);
                   render(logical);
                   ticking = false;
                 }
-
                 window.addEventListener(
                   "scroll",
                   () => {
@@ -260,7 +254,6 @@
                   },
                   { passive: true },
                 );
-
                 /* ---------- Resize handling ---------- */
                 function onResize() {
                   vh = window.innerHeight;
@@ -268,11 +261,9 @@
                   render(getLogicalScroll(window.scrollY));
                 }
                 window.addEventListener("resize", onResize);
-
                 /* ---------- Init ---------- */
                 buildLayers();
                 render(getLogicalScroll(window.scrollY));
-
                 /* ---------- Snapping logic ---------- */
                 const snapDuration = 1000; // ms
                 let isSnapping = false;
@@ -280,7 +271,6 @@
                 let snapEnd = 0;
                 let snapFrom = 0;
                 let snapTimeout;
-
                 function snapAnimation(timestamp) {
                   if (!snapStart) snapStart = timestamp;
                   const progress = Math.min(
@@ -297,7 +287,6 @@
                     snapStart = 0;
                   }
                 }
-
                 function handleSnap() {
                   if (isSnapping) return;
                   clearTimeout(snapTimeout);
@@ -351,13 +340,13 @@
       {}
     </script>
     <script
-      src="/assets/entries/entry-server-routing.DfaYMa3d.js"
+      src="/assets/entries/entry-server-routing.B701oUm0.js"
       type="module"
       async
     ></script>
     <link
       rel="modulepreload"
-      href="/assets/entries/pages_showcase.B4fcevTK.js"
+      href="/assets/entries/pages_showcase.C43PtMm-.js"
       as="script"
       type="text/javascript"
     /><link
