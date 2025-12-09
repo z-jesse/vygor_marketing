@@ -2,13 +2,13 @@
 <html
   lang="en"
   data-ws-project="77a6fa2e-6d0e-491b-bd64-869080c4b6b2"
-  data-ws-last-published="2025-12-09T02:11:37.837Z"
+  data-ws-last-published="2025-12-09T20:55:33.705Z"
 >
   <head>
     <link
       rel="stylesheet"
       type="text/css"
-      href="/assets/static/app_generated_index-6937cd5a.DUZRPmcX.css"
+      href="/assets/static/app_generated_index-6937cd5a.ZHqL-ttI.css"
     />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -275,21 +275,33 @@
                   window.__clockSetup = true;
 
                   window.startGlobalClock = function () {
-                    if (window.__clockInterval)
+                    // Clear any existing interval first
+                    if (window.__clockInterval) {
                       clearInterval(window.__clockInterval);
+                      window.__clockInterval = null;
+                    }
+
+                    // Look for the elements we need
+                    const gmt = document.getElementById("gmt");
+                    const time = document.getElementById("time");
+
+                    // If either element is missing → do nothing and don't start the clock
+                    if (!gmt || !time) {
+                      return;
+                    }
+
                     const update = () => {
-                      const gmt = document.getElementById("gmt");
-                      const time = document.getElementById("time");
-                      if (!gmt || !time) {
-                        clearInterval(window.__clockInterval);
-                        window.__clockInterval = null;
-                        return;
-                      }
                       const now = new Date();
-                      const offset = -now.getTimezoneOffset();
+
+                      // Calculate GMT offset (e.g. GMT+05:30)
+                      const offset = -now.getTimezoneOffset(); // minutes offset from UTC
                       const sign = offset >= 0 ? "+" : "-";
                       const abs = Math.abs(offset);
-                      gmt.textContent = `GMT${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
+                      const hours = Math.floor(abs / 60);
+                      const minutes = abs % 60;
+                      gmt.textContent = `GMT${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+
+                      // Update local time (12-hour format with seconds)
                       time.textContent = now.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -297,10 +309,15 @@
                         hour12: true,
                       });
                     };
+
+                    // Initial update
                     update();
+
+                    // Start the interval (only if elements exist)
                     window.__clockInterval = setInterval(update, 1000);
                   };
 
+                  // Start the clock on various page-load / turbo / htmx / livewire events
                   document.addEventListener(
                     "DOMContentLoaded",
                     window.startGlobalClock,
@@ -356,18 +373,18 @@
       {}
     </script>
     <script
-      src="/assets/entries/entry-server-routing.BzJh6PAe.js"
+      src="/assets/entries/entry-server-routing.Aw4wquQJ.js"
       type="module"
       async
     ></script>
     <link
       rel="modulepreload"
-      href="/assets/entries/pages_index.DtBJrNIj.js"
+      href="/assets/entries/pages_index.CK01jOdf.js"
       as="script"
       type="text/javascript"
     /><link
       rel="modulepreload"
-      href="/assets/chunks/chunk-Ccn2U6aw.js"
+      href="/assets/chunks/chunk-CxevWrcR.js"
       as="script"
       type="text/javascript"
     />
