@@ -2,7 +2,7 @@
 <html
   lang="en"
   data-ws-project="77a6fa2e-6d0e-491b-bd64-869080c4b6b2"
-  data-ws-last-published="2025-12-10T20:07:44.521Z"
+  data-ws-last-published="2025-12-10T20:16:43.876Z"
 >
   <head>
     <link
@@ -273,35 +273,21 @@
               <script>
                 if (!window.__clockSetup) {
                   window.__clockSetup = true;
-
                   window.startGlobalClock = function () {
-                    // Clear any existing interval first
-                    if (window.__clockInterval) {
+                    if (window.__clockInterval)
                       clearInterval(window.__clockInterval);
-                      window.__clockInterval = null;
-                    }
-
-                    // Look for the elements we need
                     const gmt = document.getElementById("gmt");
                     const time = document.getElementById("time");
-
-                    // If either element is missing → do nothing and don't start the clock
-                    if (!gmt || !time) {
-                      return;
-                    }
+                    if (!gmt || !time) return;
 
                     const update = () => {
                       const now = new Date();
-
-                      // Calculate GMT offset (e.g. GMT+05:30)
-                      const offset = -now.getTimezoneOffset(); // minutes offset from UTC
+                      const offset = -now.getTimezoneOffset();
                       const sign = offset >= 0 ? "+" : "-";
                       const abs = Math.abs(offset);
                       const hours = Math.floor(abs / 60);
                       const minutes = abs % 60;
                       gmt.textContent = `GMT${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-
-                      // Update local time (12-hour format with seconds)
                       time.textContent = now.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -309,32 +295,34 @@
                         hour12: true,
                       });
                     };
-
-                    // Initial update
                     update();
-
-                    // Start the interval (only if elements exist)
                     window.__clockInterval = setInterval(update, 1000);
                   };
 
-                  // Start the clock on various page-load / turbo / htmx / livewire events
+                  // New universal listeners (Dec 2025)
                   document.addEventListener(
                     "DOMContentLoaded",
                     window.startGlobalClock,
                   );
                   document.addEventListener(
+                    "turbo:render",
+                    window.startGlobalClock,
+                  ); // Turbo 7 / Stimulus
+                  document.addEventListener(
                     "turbo:load",
                     window.startGlobalClock,
-                  );
-                  document.addEventListener(
+                  ); // just in case older Turbo
+                  document.body.addEventListener(
                     "htmx:afterSwap",
                     window.startGlobalClock,
-                  );
+                  ); // HTMX
                   document.addEventListener(
-                    "livewire:load",
+                    "livewire:navigated",
                     window.startGlobalClock,
-                  );
+                  ); // Livewire 3
                 }
+
+                window.startGlobalClock(); // ← run it right now as fallback
               </script>
             </div>
           </div>
@@ -373,18 +361,18 @@
       {}
     </script>
     <script
-      src="/assets/entries/entry-server-routing.B37aqW3y.js"
+      src="/assets/entries/entry-server-routing.DUh_Lh8g.js"
       type="module"
       async
     ></script>
     <link
       rel="modulepreload"
-      href="/assets/entries/pages_index.BokKC2oO.js"
+      href="/assets/entries/pages_index.Yir1-yfF.js"
       as="script"
       type="text/javascript"
     /><link
       rel="modulepreload"
-      href="/assets/chunks/chunk-CxevWrcR.js"
+      href="/assets/chunks/chunk-CD5S1DAX.js"
       as="script"
       type="text/javascript"
     />
