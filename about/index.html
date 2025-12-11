@@ -2,7 +2,7 @@
 <html
   lang="en"
   data-ws-project="77a6fa2e-6d0e-491b-bd64-869080c4b6b2"
-  data-ws-last-published="2025-12-11T04:20:15.333Z"
+  data-ws-last-published="2025-12-11T04:23:24.429Z"
 >
   <head>
     <link
@@ -29,9 +29,37 @@
       crossorigin="anonymous"
     />
     <script>
-      // One-liner that fixes it for almost everyone
-      setTimeout(() => (document.title = document.title), 100);
-      setTimeout(() => (document.title = document.title), 1000);
+      // Prevent Webstudio static export from wiping the <title>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Grab the title that was in the original static HTML
+        const staticTitle = document.title || "Your Site Name";
+
+        // Force it back immediately and after every possible hydration/navigation
+        const forceTitle = () => {
+          if (document.title !== staticTitle) {
+            document.title = staticTitle;
+          }
+        };
+
+        forceTitle();
+
+        // Re-apply on common navigation events Webstudio uses
+        [
+          "turbo:render",
+          "htmx:afterSwap",
+          "livewire:navigated",
+          "popstate",
+        ].forEach((ev) => {
+          document.addEventListener(ev, forceTitle);
+        });
+
+        // Fallback: re-apply every 500 ms for the first 5 seconds (covers weird timing)
+        let attempts = 0;
+        const interval = setInterval(() => {
+          forceTitle();
+          if (++attempts > 10) clearInterval(interval);
+        }, 500);
+      });
     </script>
   </head>
   <body class="w-element cwu9tw6">
@@ -265,18 +293,18 @@
       {}
     </script>
     <script
-      src="/assets/entries/entry-server-routing.DzCfKEoK.js"
+      src="/assets/entries/entry-server-routing.BXx540PU.js"
       type="module"
       async
     ></script>
     <link
       rel="modulepreload"
-      href="/assets/entries/pages_about.BMhXJ7u5.js"
+      href="/assets/entries/pages_about.oKdV43UU.js"
       as="script"
       type="text/javascript"
     /><link
       rel="modulepreload"
-      href="/assets/chunks/chunk-3Ckc4ltk.js"
+      href="/assets/chunks/chunk-Dq6NRhse.js"
       as="script"
       type="text/javascript"
     />
