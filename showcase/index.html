@@ -2,7 +2,7 @@
 <html
   lang="en"
   data-ws-project="77a6fa2e-6d0e-491b-bd64-869080c4b6b2"
-  data-ws-last-published="2025-12-11T04:23:24.429Z"
+  data-ws-last-published="2025-12-17T01:21:09.691Z"
 >
   <head>
     <link
@@ -172,9 +172,10 @@
                     coordinates: "40.7128°N / 74.0060°W",
                     website: "-------------",
                     image:
-                      "https://res.cloudinary.com/drihq534t/image/upload/v1764744897/jbrpmzngd1rvjkasjybp_40_zknb6o.webp",
+                      "https://res.cloudinary.com/drihq534t/image/upload/v1765934418/12_13_23_SuiYoga_-21_web-1365x800_fqufi7.jpg",
                   },
                 ];
+
                 /* ---------- DOM references ---------- */
                 const bg = document.getElementById("bg-scroll");
                 const spacer = document.getElementById("spacer");
@@ -184,29 +185,30 @@
                 const coordsEl = document.getElementById("coordinates");
                 const websiteEl = document.getElementById("website");
                 const linkEl = document.getElementById("link");
+
                 /* ---------- State ---------- */
                 let vh = window.innerHeight;
                 const total = sections.length;
-                const cycleCount = 2; // duplicate image stack -> seamless wrap
-                const logicalHeight = vh * total; // height of single logical cycle
-                const spacerMultiplier = 200; // page scroll length
+                const cycleCount = 2; // for seamless loop
+                const logicalHeight = vh * total;
+                const spacerMultiplier = 50;
                 let layers = [];
                 let ticking = false;
                 let lastSectionIndex = -1;
-                /* ---------- Build layers ---------- */
+
+                /* ---------- Build layers (original style but cleaned up) ---------- */
                 function buildLayers() {
                   bg.innerHTML = "";
                   layers = [];
                   for (let cycle = 0; cycle < cycleCount; cycle++) {
                     for (let i = 0; i < total; i++) {
-                      const s = sections[i];
                       const layer = document.createElement("div");
                       layer.style.position = "absolute";
                       layer.style.top = "0";
                       layer.style.left = "0";
                       layer.style.width = "100%";
                       layer.style.height = "100%";
-                      layer.style.backgroundImage = `url('${s.image}')`;
+                      layer.style.backgroundImage = `url('${sections[i].image}')`;
                       layer.style.backgroundSize = "cover";
                       layer.style.backgroundPosition = "center";
                       layer.style.backgroundRepeat = "no-repeat";
@@ -218,6 +220,7 @@
                   }
                   spacer.style.height = `${logicalHeight * spacerMultiplier}px`;
                 }
+
                 /* ---------- Helpers ---------- */
                 function getLogicalScroll(realScroll) {
                   return (
@@ -225,6 +228,7 @@
                     logicalHeight
                   );
                 }
+
                 function setCenterContent(idx) {
                   const i = ((idx % total) + total) % total;
                   const s = sections[i];
@@ -241,32 +245,32 @@
                     linkEl.style.pointerEvents = "auto";
                   }
                 }
-                /* ---------- Render loop ---------- */
-                function render(logicalScroll) {
-                  // center of viewport
-                  const centerY = logicalScroll + vh / 2;
 
-                  // which section contains the centerY point
+                /* ---------- Render ---------- */
+                function render(logicalScroll) {
+                  const centerY = logicalScroll + vh / 2;
                   const sectionIndex = Math.floor(centerY / vh) % total;
 
-                  // update content only when section changes
                   if (sectionIndex !== lastSectionIndex) {
                     setCenterContent(sectionIndex);
                     lastSectionIndex = sectionIndex;
                   }
 
-                  // move all layers as before
+                  // Translate each layer
                   for (let idx = 0; idx < layers.length; idx++) {
                     const layerTop = idx * vh;
                     const translateY = layerTop - logicalScroll;
-                    layers[idx].style.transform = `translateY(${translateY}px)`;
+                    layers[idx].style.transform =
+                      `translate3d(0, ${translateY}px, 0)`;
                   }
                 }
+
                 function onScrollRaf() {
                   const logical = getLogicalScroll(window.scrollY);
                   render(logical);
                   ticking = false;
                 }
+
                 window.addEventListener(
                   "scroll",
                   () => {
@@ -274,34 +278,39 @@
                       ticking = true;
                       requestAnimationFrame(onScrollRaf);
                     }
-                    handleSnap(); // call snap debounce on scroll
+                    handleSnap();
                   },
                   { passive: true },
                 );
-                /* ---------- Resize handling ---------- */
+
+                /* ---------- Resize ---------- */
                 function onResize() {
                   vh = window.innerHeight;
                   buildLayers();
                   render(getLogicalScroll(window.scrollY));
                 }
                 window.addEventListener("resize", onResize);
+
                 /* ---------- Init ---------- */
                 buildLayers();
                 render(getLogicalScroll(window.scrollY));
-                /* ---------- Snapping logic ---------- */
-                const snapDuration = 1000; // ms
+
+                /* ---------- Gentler snapping ---------- */
+                const snapDelay = 250;
+                const snapDuration = 800;
                 let isSnapping = false;
                 let snapStart = 0;
-                let snapEnd = 0;
                 let snapFrom = 0;
+                let snapEnd = 0;
                 let snapTimeout;
+
                 function snapAnimation(timestamp) {
                   if (!snapStart) snapStart = timestamp;
                   const progress = Math.min(
                     (timestamp - snapStart) / snapDuration,
                     1,
                   );
-                  const eased = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+                  const eased = 1 - Math.pow(1 - progress, 3);
                   const newPos = snapFrom + (snapEnd - snapFrom) * eased;
                   window.scrollTo(0, newPos);
                   if (progress < 1) {
@@ -311,20 +320,25 @@
                     snapStart = 0;
                   }
                 }
+
                 function handleSnap() {
                   if (isSnapping) return;
                   clearTimeout(snapTimeout);
                   snapTimeout = setTimeout(() => {
                     const scrollY = window.scrollY;
                     const logical = getLogicalScroll(scrollY);
+                    const offset = logical % vh;
+                    if (Math.abs(offset - vh / 2) > vh / 3) return; // only snap if close
+
                     const nearestSection = Math.round(logical / vh);
                     const snapTo = scrollY - (logical - nearestSection * vh);
+
                     isSnapping = true;
-                    snapStart = 0;
                     snapFrom = scrollY;
                     snapEnd = snapTo;
+                    snapStart = 0;
                     requestAnimationFrame(snapAnimation);
-                  }, 80);
+                  }, snapDelay);
                 }
               })();
             </script>
@@ -364,13 +378,13 @@
       {}
     </script>
     <script
-      src="/assets/entries/entry-server-routing.BXx540PU.js"
+      src="/assets/entries/entry-server-routing.CREH9HyJ.js"
       type="module"
       async
     ></script>
     <link
       rel="modulepreload"
-      href="/assets/entries/pages_showcase.Bcd1UiPn.js"
+      href="/assets/entries/pages_showcase.Cngc4lbB.js"
       as="script"
       type="text/javascript"
     /><link
